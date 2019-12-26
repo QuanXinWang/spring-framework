@@ -48,9 +48,8 @@ import org.springframework.util.ResourceUtils;
 public abstract class AbstractResource implements Resource {
 
 	/**
-	 * This implementation checks whether a File can be opened,
-	 * falling back to whether an InputStream can be opened.
-	 * This will cover both directories and content resources.
+	 * 判断文件是否存在，如果判断过程产生异常（因为会调用securityManager来判断）就关闭对应的流
+	 * @return
 	 */
 	@Override
 	public boolean exists() {
@@ -66,7 +65,7 @@ public abstract class AbstractResource implements Resource {
 				}
 			}
 		}
-		// Fall back to stream existence: can we open the stream?
+		// 直接返回true 表示可读
 		try {
 			getInputStream().close();
 			return true;
@@ -81,8 +80,8 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
-	 * This implementation always returns {@code true} for a resource
-	 * that {@link #exists() exists} (revised as of 5.1).
+	 * 返回是否可读
+	 * @return
 	 */
 	@Override
 	public boolean isReadable() {
@@ -90,7 +89,8 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
-	 * This implementation always returns {@code false}.
+	 * 直接返回fasle表示未被打开
+	 * @return
 	 */
 	@Override
 	public boolean isOpen() {
@@ -98,7 +98,8 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
-	 * This implementation always returns {@code false}.
+	 * 直接返回false表示不为file
+	 * @return
 	 */
 	@Override
 	public boolean isFile() {
@@ -106,8 +107,9 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
-	 * This implementation throws a FileNotFoundException, assuming
-	 * that the resource cannot be resolved to a URL.
+	 * FileNotFoundException 抛异常给子类处理
+	 * @return
+	 * @throws IOException
 	 */
 	@Override
 	public URL getURL() throws IOException {
@@ -115,8 +117,9 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
-	 * This implementation builds a URI based on the URL returned
-	 * by {@link #getURL()}.
+	 * 基于getURL返回URL构建 URI
+	 * @return
+	 * @throws IOException
 	 */
 	@Override
 	public URI getURI() throws IOException {
@@ -130,8 +133,9 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
-	 * This implementation throws a FileNotFoundException, assuming
-	 * that the resource cannot be resolved to an absolute file path.
+	 * FileNotFoundException 抛异常给子类处理
+	 * @return
+	 * @throws IOException
 	 */
 	@Override
 	public File getFile() throws IOException {
@@ -139,10 +143,9 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
-	 * This implementation returns {@link Channels#newChannel(InputStream)}
-	 * with the result of {@link #getInputStream()}.
-	 * <p>This is the same as in {@link Resource}'s corresponding default method
-	 * but mirrored here for efficient JVM-level dispatching in a class hierarchy.
+	 * 根据getInputStream()的返回结果构建ReadableByteChannel
+	 * @return
+	 * @throws IOException
 	 */
 	@Override
 	public ReadableByteChannel readableChannel() throws IOException {
@@ -150,10 +153,10 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
-	 * This implementation reads the entire InputStream to calculate the
-	 * content length. Subclasses will almost always be able to provide
-	 * a more optimal version of this, e.g. checking a File length.
-	 * @see #getInputStream()
+	 * 获取资源长度
+	 * 	这个资源实际就是资源的资源程度，全部读取一遍来判断
+	 * @return
+	 * @throws IOException
 	 */
 	@Override
 	public long contentLength() throws IOException {
@@ -181,9 +184,9 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
-	 * This implementation checks the timestamp of the underlying File,
-	 * if available.
-	 * @see #getFileForLastModifiedCheck()
+	 * 返回资源最后修改时间
+	 * @return
+	 * @throws IOException
 	 */
 	@Override
 	public long lastModified() throws IOException {
@@ -209,8 +212,10 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
-	 * This implementation throws a FileNotFoundException, assuming
-	 * that relative resources cannot be created for this resource.
+	 * 抛出 FileNotFoundException 异常，交给子类实现
+	 * @param relativePath
+	 * @return
+	 * @throws IOException
 	 */
 	@Override
 	public Resource createRelative(String relativePath) throws IOException {
@@ -218,8 +223,8 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
-	 * This implementation always returns {@code null},
-	 * assuming that this resource type does not have a filename.
+	 * 获取资源名称，默认返回 null ，交给子类实现
+	 * @return
 	 */
 	@Override
 	@Nullable
@@ -248,8 +253,8 @@ public abstract class AbstractResource implements Resource {
 	}
 
 	/**
-	 * This implementation returns the description of this resource.
-	 * @see #getDescription()
+	 * 返回资源描述
+	 * @return
 	 */
 	@Override
 	public String toString() {

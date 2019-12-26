@@ -42,6 +42,7 @@ import org.springframework.util.ResourceUtils;
 public interface ResourceLoader {
 
 	/** Pseudo URL prefix for loading from the class path: "classpath:". */
+	// classpath 默认为本路惊吓的文件加载
 	String CLASSPATH_URL_PREFIX = ResourceUtils.CLASSPATH_URL_PREFIX;
 
 
@@ -63,6 +64,11 @@ public interface ResourceLoader {
 	 * @see #CLASSPATH_URL_PREFIX
 	 * @see Resource#exists()
 	 * @see Resource#getInputStream()
+	 * 根据所提供资源的路径 location 返回 Resource 实例，但是它不确保该 Resource 一定存在，需要调用 Resource#exist() 方法来判断。
+	 *
+	 * URL位置资源，如 "file:C:/test.dat" 。
+	 * ClassPath位置资源，如 "classpath:test.dat 。
+	 * 相对路径资源，如 "WEB-INF/test.dat" ，此时返回的
 	 */
 	Resource getResource(String location);
 
