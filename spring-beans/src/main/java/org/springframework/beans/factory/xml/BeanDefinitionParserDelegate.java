@@ -412,30 +412,35 @@ public class BeanDefinitionParserDelegate {
 	 */
 	@Nullable
 	public BeanDefinitionHolder parseBeanDefinitionElement(Element ele, @Nullable BeanDefinition containingBean) {
+		// 解析 id 和 name 属性
 		String id = ele.getAttribute(ID_ATTRIBUTE);
 		String nameAttr = ele.getAttribute(NAME_ATTRIBUTE);
 
+		// 计算别名集合
 		List<String> aliases = new ArrayList<>();
 		if (StringUtils.hasLength(nameAttr)) {
 			String[] nameArr = StringUtils.tokenizeToStringArray(nameAttr, MULTI_VALUE_ATTRIBUTE_DELIMITERS);
 			aliases.addAll(Arrays.asList(nameArr));
 		}
-
+		// beanName 优先使用id
 		String beanName = id;
+		// beanName 其次使用 aliases的第一个
 		if (!StringUtils.hasText(beanName) && !aliases.isEmpty()) {
+			// 移除别名集合
 			beanName = aliases.remove(0);
 			if (logger.isTraceEnabled()) {
 				logger.trace("No XML 'id' specified - using '" + beanName +
 						"' as bean name and " + aliases + " as aliases");
 			}
 		}
-
+		// 检查beanName的唯一性
 		if (containingBean == null) {
 			checkNameUniqueness(beanName, aliases, ele);
 		}
-
+		// 解析属性 ，构造AbstractBeanDefinition对象
 		AbstractBeanDefinition beanDefinition = parseBeanDefinitionElement(ele, beanName, containingBean);
 		if (beanDefinition != null) {
+			// beanName 再次 使用它的生成规则
 			if (!StringUtils.hasText(beanName)) {
 				try {
 					if (containingBean != null) {
